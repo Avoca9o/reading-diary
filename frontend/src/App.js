@@ -1,22 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import './App.css';
+import UsersRenderer from './UsersRenderer';
+import UserProfileRenderer from './UserProfileRenderer';
+import BookInfo from './BookInfo';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-const App = () => {
-  const [message, setMessage] = useState('');
+function Home() {
+  return   <div className="App">
+    <header>Users</header>
+    <UsersRenderer></UsersRenderer>
+  </div>
+}
 
-  useEffect(() => {
-    fetch('http://0.0.0.0:80/')
-      .then(response => response.json())
-      .then(data => setMessage(data.Hello));
-  }, []);
+const App = () => (
 
-  return (
-    <div>
-      <header>
-        <h1>Hello World from React!</h1>
-        <h2>Message from API: {message}</h2>
-      </header>
-    </div>
-  );
-};
+  <Router>
+      <div>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/profile/:user" element={<UserProfileRenderer/>} />
+          <Route path="/profile/:user/:book" element={<BookInfo />} />
+        </Routes>
+      </div>
+    </Router>
+);
 
 export default App;
