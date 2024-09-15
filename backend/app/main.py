@@ -1,11 +1,22 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import models
-import db_query
-import db_init
-
+import app.models as models
+import app.db_query as db_query
+import app.db_init as db_init
 import sqlite3
 from sqlite3 import Error
+
+
+app = FastAPI()
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 def create_connection(path):
     connection = None
@@ -16,6 +27,7 @@ def create_connection(path):
         print(f"The error '{e}' occurred")
 
     return connection
+
 
 def execute_query(query):
     connection = create_connection("./readind_diary.sqlite")
@@ -49,27 +61,6 @@ execute_query(db_init.books)
 execute_query(db_init.notes)
 
 
-app = FastAPI()
-origins = ["*"]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-@app.get("/users")
-def get_users():
-    get_users_db = db_query.get_users()
-    users_db = execute_read_query(get_users_db)
-
-    users = [{"id" : user_db[0], "name" : user_db[1]} for user_db in users_db]
-
-    return users
-
-
 @app.post("/add-user")
 def add_user(user : models.AddUser):
     add_user_db = db_query.get_add_user(user.name)
@@ -77,6 +68,20 @@ def add_user(user : models.AddUser):
     ret = execute_query(add_user_db)
 
     return {"code": 200 if ret else 404}
+
+
+@app.get("/users")
+async def get_users():
+    # debug: to render non empty list on frontend
+    execute_query(db_query.get_add_user("steve"))
+    execute_query(db_query.get_add_user("girga"))
+
+    get_users_db = db_query.get_users()
+    users_db = execute_read_query(get_users_db)
+
+    users = [{"id" : user_db[0], "name" : user_db[1]} for user_db in users_db]
+
+    return users
 
 
 @app.delete("/delete-user")
