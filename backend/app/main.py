@@ -71,11 +71,7 @@ def add_user(user : models.AddUser):
 
 
 @app.get("/users")
-async def get_users():
-    # debug: to render non empty list on frontend
-    execute_query(db_query.get_add_user("steve"))
-    execute_query(db_query.get_add_user("girga"))
-
+def get_users():
     get_users_db = db_query.get_users()
     users_db = execute_read_query(get_users_db)
 
@@ -108,7 +104,7 @@ def is_book_exist(id):
     return any([book[0] == id for book in books])
 
 
-@app.get("/books")
+@app.post("/books")
 def get_books(user: models.User):
     if not is_user_exist(user.id):
         return {"message" : "invalid user"}
@@ -141,7 +137,7 @@ def delete_book(book: models.Book):
 
     return {"code": 200 if ret else 404}
 
-@app.get("/notes")
+@app.post("/notes")
 def get_notes(book: models.Book):
     if not is_book_exist(book.id):
         return {"message" : "invalid book"}
